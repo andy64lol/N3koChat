@@ -216,6 +216,21 @@ button:hover {
 	display: none
 }
 
+.back-button {
+    padding: 8px 16px;
+    background: var(--accent-color);
+    color: white;
+    text-decoration: none;
+    border-radius: 20px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.back-button:hover {
+    background: #ff5980;
+    transform: scale(0.98);
+}
+
 @media (max-width:768px) {
 	.bubble {
 		max-width: 90%;
@@ -236,9 +251,10 @@ button:hover {
     <div class="header">
         <div class="avatar">:3</div>
         <div>
-            <h1>N3ko Chatbot (Tsundere)</h1>
+            <h1>N3ko Chatbot</h1>
             <p class="status">Online</p>
         </div>
+        <a href="index.html" class="back-button">Back</a>
         <a href="https://github.com/andy64lol/N3ko/tree/main" target="_blank" class="github-button">i</a>
         <span class="model-loading" id="modelLoading">Loading...</span>
     </div>
