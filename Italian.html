@@ -278,71 +278,71 @@ button:hover {
         </div>
     </div>
 
-    <script>
-        const MODEL_BASE_URL = 'https://raw.githubusercontent.com/andy64lol/N3ko/refs/heads/main/';
-        const currentModel = 'Italian';
+  <script>
+    const MODEL_BASE_URL = 'https://raw.githubusercontent.com/andy64lol/N3ko/refs/heads/main/';
+    const currentModel = 'Italian';  
 
-        async function loadModel(modelName){
-            document.getElementById('modelLoading').style.display = 'block';
-            try{
-                const modelFile = `N3ko_${modelName}_model_.js`;
-                const response = await fetch(`${MODEL_BASE_URL}${modelFile}`);
-                if(!response.ok) throw new Error('Model load failed');
-                const scriptText = await response.text();
-                const scriptBlob = new Blob([scriptText],{type:'application/javascript'});
-                const module = await import(URL.createObjectURL(scriptBlob));
-                return module.default;
-            }catch(error){
-                console.error('Model error:',error);
-                throw error;
-            }finally{
-                document.getElementById('modelLoading').style.display = 'none';
-            }
+    async function loadModel(modelName){
+        document.getElementById('modelLoading').style.display = 'block';
+        try{
+            const modelFile = `N3ko_${modelName}_model_.js`;
+            const response = await fetch(`${MODEL_BASE_URL}${modelFile}`);
+            if(!response.ok) throw new Error('Model load failed');
+            const scriptText = await response.text();
+            const scriptBlob = new Blob([scriptText],{type:'application/javascript'});
+            const module = await import(URL.createObjectURL(scriptBlob));
+            return module.default;
+        }catch(error){
+            console.error('Model error:',error);
+            throw error;
+        }finally{
+            document.getElementById('modelLoading').style.display = 'none';
         }
+    }
 
-        function addMessage(sender,text){
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${sender}-message`;
-            messageDiv.innerHTML = `<div class="avatar">:3</div><div class="bubble ${sender}-bubble">${text}</div>`;
-            document.getElementById('chatContainer').appendChild(messageDiv);
-            document.getElementById('chatContainer').scrollTop = document.getElementById('chatContainer').scrollHeight;
+    function addMessage(sender,text){
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${sender}-message`;
+        messageDiv.innerHTML = `<div class="avatar">:3</div><div class="bubble ${sender}-bubble">${text}</div>`;
+        document.getElementById('chatContainer').appendChild(messageDiv);
+        document.getElementById('chatContainer').scrollTop = document.getElementById('chatContainer').scrollHeight;
+    }
+
+    async function handleSend(){
+        const text = document.getElementById('userInput').value.trim();
+        if(!text) return;
+        
+        addMessage('user',text);
+        document.getElementById('userInput').value = '';
+        document.getElementById('typingIndicator').style.display = 'block';
+        
+        try{
+            await new Promise(r => setTimeout(r,800));
+            const response = chatInstance.generateResponse(text);
+            addMessage('bot',response);
+        }catch(error){
+            addMessage('bot','Response error!');
         }
+        document.getElementById('typingIndicator').style.display = 'none';
+    }
 
-        async function handleSend(){
-            const text = document.getElementById('userInput').value.trim();
-            if(!text) return;
-            
-            addMessage('user',text);
-            document.getElementById('userInput').value = '';
-            document.getElementById('typingIndicator').style.display = 'block';
-            
-            try{
-                await new Promise(r => setTimeout(r,800));
-                const response = chatInstance.generateResponse(text);
-                addMessage('bot',response);
-            }catch(error){
-                addMessage('bot','Response error!');
-            }
-            document.getElementById('typingIndicator').style.display = 'none';
+    (async () => {
+        try{
+            const ModelClass = await loadModel(currentModel);
+            chatInstance = new ModelClass();
+            await chatInstance.init();
+            document.querySelector('.status').textContent = 'Online';
+            document.getElementById('sendButton').addEventListener('click',handleSend);
+            document.getElementById('userInput').addEventListener('keypress',e => {
+                if(e.key === 'Enter' && !e.shiftKey){
+                    e.preventDefault();
+                    handleSend();
+                }
+            });
+        }catch(error){
+            document.querySelector('.status').textContent = 'Offline';
         }
-
-        (async () => {
-            try{
-                const ModelClass = await loadModel(currentModel);
-                chatInstance = new ModelClass();
-                await chatInstance.init();
-                document.querySelector('.status').textContent = 'Online';
-                document.getElementById('sendButton').addEventListener('click',handleSend);
-                document.getElementById('userInput').addEventListener('keypress',e => {
-                    if(e.key === 'Enter' && !e.shiftKey){
-                        e.preventDefault();
-                        handleSend();
-                    }
-                });
-            }catch(error){
-                document.querySelector('.status').textContent = 'Offline';
-            }
-        })();
-    </script>
+    })();
+</script>
 </body>
 </html>
