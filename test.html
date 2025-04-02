@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N3ko TensorNyan Chat</title>
+    <!-- Add TensorFlow.js dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder@1.3.3"></script>
+    <style>
+               :root {
+	--primary-color: #f7f7fc;
+	--secondary-color: #fff;
+	--accent-color: #ff7b9c;
+	--text-color: #2d2d2d;
+	--bot-bubble: #f5f5f5;
+	--user-bubble: #ff7b9c;
+	--shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1)
+}
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	font-family: 'Inter', system-ui, sans-serif
+}
+
+body {
+	background-color: var(--primary-color);
+	height: 100vh;
+	display: flex;
+	flex-direction: column
+}
+
+.header {
+	background-color: var(--secondary-color);
+	padding: 1rem;
+	box-shadow: var(--shadow);
+	display: flex;
+	align-items: center;
+	gap: 15px;
+	position: sticky;
+	top: 0;
+	z-index: 100
+}
+
+.avatar {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	background-color: var(--accent-color);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #fff;
+	font-weight: 700;
+	flex-shrink: 0
+}
+
+.chat-container {
+	flex: 1;
+	max-width: 800px;
+	margin: 0 auto;
+	width: 100%;
+	padding: 20px;
+	overflow-y: auto;
+	padding-bottom: 100px;
+	scroll-behavior: smooth
+}
+
+.message {
+	display: flex;
+	gap: 15px;
+	margin: 20px 0;
+	opacity: 0;
+	transform: translateY(20px);
+	animation: messageIn 0.3s ease forwards
+}
+
+@keyframes messageIn {
+	to {
+		opacity: 1;
+		transform: translateY(0)
+	}
+}
+
+.bubble {
+	max-width: min(80%, 700px);
+	padding: 16px 24px;
+	border-radius: 24px;
+	line-height: 1.6;
+	position: relative;
+	word-break: break-word;
+	white-space: pre-wrap
+}
+
+.bot-bubble {
+	background: var(--bot-bubble);
+	color: var(--text-color);
+	border-radius: 24px 24px 24px 6px;
+	box-shadow: var(--shadow)
+}
+
+.user-bubble {
+	background: var(--user-bubble);
+	color: #fff;
+	border-radius: 24px 24px 6px 24px;
+	box-shadow: var(--shadow)
+}
+
+.input-container {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background: linear-gradient(to top, rgba(255, 255, 255, 1) 70%, rgba(255, 255, 255, 0));
+	padding: 20px;
+	display: flex;
+	justify-content: center;
+	backdrop-filter: blur(8px)
+}
+
+.input-wrapper {
+	width: 100%;
+	max-width: 800px;
+	position: relative
+}
+
+input {
+	width: 100%;
+	padding: 16px 140px 16px 24px;
+	border: 2px solid #eee;
+	border-radius: 30px;
+	font-size: 16px;
+	outline: none;
+	transition: all 0.2s ease;
+	background: rgba(255, 255, 255, 0.9)
+}
+
+input:focus {
+	border-color: var(--accent-color);
+	box-shadow: 0 0 0 3px rgba(255, 123, 156, 0.2)
+}
+
+button {
+	position: absolute;
+	right: 6px;
+	top: 6px;
+	padding: 10px 24px;
+	border-radius: 24px;
+	border: none;
+	background: var(--accent-color);
+	color: #fff;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	font-weight: 600
+}
+
+button:hover {
+	background: #ff5980;
+	transform: scale(0.98)
+}
+
+.typing-indicator {
+	display: none;
+	padding: 16px 24px;
+	background: var(--bot-bubble);
+	border-radius: 24px;
+	width: fit-content;
+	margin: 10px 0;
+	box-shadow: var(--shadow);
+	gap: 8px
+}
+
+.typing-dot {
+	width: 10px;
+	height: 10px;
+	background: #999;
+	border-radius: 50%;
+	animation: typing 1.4s infinite
+}
+
+@keyframes typing {
+
+	0%,
+	100% {
+		transform: translateY(0);
+		opacity: 0.4
+	}
+
+	50% {
+		transform: translateY(-4px);
+		opacity: 1
+	}
+}
+
+.github-button {
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	background: var(--accent-color);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #fff;
+	text-decoration: none;
+	transition: all 0.2s ease;
+	margin-left: auto;
+}
+
+.github-button:hover {
+	transform: scale(1.1);
+	box-shadow: 0 2px 8px rgba(255, 123, 156, 0.3)
+}
+
+.model-loading {
+	font-size: 0.9em;
+	color: #666;
+	display: none
+}
+
+.back-button {
+    padding: 8px 16px;
+    background: var(--accent-color);
+    color: white;
+    text-decoration: none;
+    border-radius: 20px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.back-button:hover {
+    background: #ff5980;
+    transform: scale(0.98);
+}
+
+@media (max-width:768px) {
+	.bubble {
+		max-width: 90%;
+		padding: 14px 20px
+	}
+
+	input {
+		padding: 14px 120px 14px 20px
+	}
+
+	button {
+		padding: 8px 20px
+	}
+}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="avatar">:3</div>
+        <div>
+            <h1>TensorNyan Chat</h1>
+            <p class="status" id="status">Loading Model...</p>
+        </div>
+        <a href="index.html" class="back-button">Back</a>
+        <a href="https://github.com/andy64lol/N3ko" target="_blank" class="github-button">★</a>
+        <span class="model-loading" id="modelLoading">Initializing AI...</span>
+    </div>
+
+    <div class="chat-container" id="chatContainer">
+        <div class="message bot-message">
+            <div class="avatar">:3</div>
+            <div class="bubble bot-bubble">Initializing TensorNyan model...</div>
+        </div>
+    </div>
+
+    <div class="input-container">
+        <div class="input-wrapper">
+            <input type="text" id="userInput" placeholder="Type message..." 
+                   aria-label="Chat input" disabled>
+            <button id="sendButton" disabled>Send</button>
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        const MODEL_NAME = 'TensorNyan';
+        const MODEL_URL = 'https://raw.githubusercontent.com/andy64lol/N3ko/refs/heads/main/test/N3ko_TensorNyan_model_.js';
+        const VOCAB_URL = 'https://raw.githubusercontent.com/andy64lol/N3ko/refs/heads/main/test/N3ko_TensorNyan_model_.json';
+
+        let chatInstance;
+        let isProcessing = false;
+
+        async function loadModel() {
+            try {
+                const module = await import(MODEL_URL);
+                return module.default;
+            } catch (error) {
+                console.error('Model load error:', error);
+                throw error;
+            }
+        }
+
+        function updateUIState() {
+            const input = document.getElementById('userInput');
+            const button = document.getElementById('sendButton');
+            if (chatInstance && !isProcessing) {
+                input.disabled = false;
+                button.disabled = false;
+                input.placeholder = "Type message...";
+            } else {
+                input.disabled = true;
+                button.disabled = true;
+                input.placeholder = "Model initializing...";
+            }
+        }
+
+        function addMessage(sender, text) {
+            const container = document.getElementById('chatContainer');
+            const message = document.createElement('div');
+            message.className = `message ${sender}-message`;
+            message.innerHTML = `
+                <div class="avatar">:3</div>
+                <div class="bubble ${sender}-bubble">${text}</div>
+            `;
+            container.appendChild(message);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function handleSend() {
+            if (isProcessing) return;
+            
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            try {
+                isProcessing = true;
+                updateUIState();
+                addMessage('user', text);
+                input.value = '';
+                document.getElementById('typingIndicator').style.display = 'flex';
+
+                const response = await chatInstance.generateResponse(text);
+                addMessage('bot', response);
+            } catch (error) {
+                console.error('Chat error:', error);
+                addMessage('bot', 'Nyan~ Something went wrong! (╯°□°)╯');
+            } finally {
+                isProcessing = false;
+                document.getElementById('typingIndicator').style.display = 'none';
+                updateUIState();
+            }
+        }
+
+        // Initialize chatbot
+        (async () => {
+            try {
+                const ModelClass = await loadModel();
+                chatInstance = new ModelClass(VOCAB_URL);
+                await chatInstance.init();
+                
+                document.getElementById('status').textContent = 'Online';
+                document.getElementById('chatContainer').innerHTML = `
+                    <div class="message bot-message">
+                        <div class="avatar">:3</div>
+                        <div class="bubble bot-bubble">TensorNyan ready! Ask me anything! (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧</div>
+                    </div>
+                `;
+
+                // Setup event listeners
+                document.getElementById('sendButton').addEventListener('click', handleSend);
+                document.getElementById('userInput').addEventListener('keypress', e => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSend();
+                    }
+                });
+
+            } catch (error) {
+                console.error('Initialization error:', error);
+                document.getElementById('status').textContent = 'Offline';
+                addMessage('bot', 'Failed to initialize model. Please refresh!');
+            } finally {
+                document.getElementById('modelLoading').style.display = 'none';
+                updateUIState();
+            }
+        })();
+    </script>
+</body>
+</html>
