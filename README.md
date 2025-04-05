@@ -3,7 +3,7 @@
 [![Website](https://img.shields.io/badge/N3koChat-Visit-blue)](https://andy64lol.github.io/N3koChat)
 [![Library](https://img.shields.io/badge/N3ko-Library-green)](https://github.com/andy64lol/N3ko/tree/main)
 
-Welcome to **N3koChat**, a project where you can create fun and powerful chatbots using the **N3ko** library!
+Welcome to **N3koChat**, my website made for the N3ko models!
 
 ---
 
@@ -19,4 +19,4 @@ Welcome to **N3koChat**, a project where you can create fun and powerful chatbot
 
 ---
 
-> *Made with love by **andy64lol** and the cat army. 🐾*
+> *Made with love by **andy64lol** and his cat army. 🐾*
