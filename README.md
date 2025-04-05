@@ -14,7 +14,7 @@ Chat, explore, and have lots of fluffy fun!
 
 ---
 
-## 📚 Learn & Play
+## 📚 The library
 
 👉 [💻 N3ko Library on GitHub 💻](https://github.com/andy64lol/N3ko/tree/main)  
 Peek behind the curtains and see how the magic works!
@@ -22,3 +22,66 @@ Peek behind the curtains and see how the magic works!
 ---
 
 > 🐾 *Made with extra love, sparkles, and a team of fluffy helpers by **andy64lol**!* 🎀
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Also,remember that we always add new features to the nyan model for testing,stay tuned!
