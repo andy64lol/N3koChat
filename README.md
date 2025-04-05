@@ -1,15 +1,22 @@
-# N3koChat: Chatbots made with the library N3ko!
+# N3koChat: Chatbots Powered by the N3ko Library! 🐱💬
 
----
-## Click the link under to go to the website!
+[![Website](https://img.shields.io/badge/N3koChat-Visit-blue)](https://andy64lol.github.io/N3koChat)
+[![Library](https://img.shields.io/badge/N3ko-Library-green)](https://github.com/andy64lol/N3ko/tree/main)
 
-https://andy64lol.github.io/N3koChat
-
----
-## Click the link under to go to the library!
-
-https://github.com/andy64lol/N3ko/tree/main
+Welcome to **N3koChat**, a project where you can create fun and powerful chatbots using the **N3ko** library!
 
 ---
 
-*made by andy64lol alongside the cat army.*
+## 🌐 Website
+
+👉 [Visit N3koChat](https://andy64lol.github.io/N3koChat)
+
+---
+
+## 📚 Library
+
+👉 [Explore the N3ko Library](https://github.com/andy64lol/N3ko/tree/main)
+
+---
+
+> *Made with love by **andy64lol** and the cat army. 🐾*
