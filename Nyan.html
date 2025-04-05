@@ -260,10 +260,7 @@ button:hover {
     </div>
 
     <div class="chat-container" id="chatContainer">
-        <div class="message bot-message">
-            <div class="avatar">:3</div>
-            <div class="bubble bot-bubble">N3ko is ready!</div>
-        </div>
+	    
     </div>
 
     <div class="input-container">
@@ -281,6 +278,8 @@ button:hover {
     <script>
         const MODEL_BASE_URL = 'https://raw.githubusercontent.com/andy64lol/N3ko/refs/heads/main/';
         const currentModel = 'Nyan';
+        let chatInstance;
+        let chatHistory = JSON.parse(localStorage.getItem('chatHistory')) || [];
 
         async function loadModel(modelName){
             document.getElementById('modelLoading').style.display = 'block';
@@ -300,26 +299,45 @@ button:hover {
             }
         }
 
-        function addMessage(sender,text){
+        function addMessage(sender, text){
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${sender}-message`;
             messageDiv.innerHTML = `<div class="avatar">:3</div><div class="bubble ${sender}-bubble">${text}</div>`;
             document.getElementById('chatContainer').appendChild(messageDiv);
             document.getElementById('chatContainer').scrollTop = document.getElementById('chatContainer').scrollHeight;
+            
+            chatHistory.push({ sender, text });
+            localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+        }
+
+        function loadChatHistory() {
+            document.getElementById('chatContainer').innerHTML = '';
+            
+            if (chatHistory.length === 0) {
+                addMessage('bot', 'N3ko is ready!');
+                return;
+            }
+            
+            chatHistory.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${msg.sender}-message`;
+                messageDiv.innerHTML = `<div class="avatar">:3</div><div class="bubble ${msg.sender}-bubble">${msg.text}</div>`;
+                document.getElementById('chatContainer').appendChild(messageDiv);
+            });
         }
 
         async function handleSend(){
             const text = document.getElementById('userInput').value.trim();
             if(!text) return;
             
-            addMessage('user',text);
+            addMessage('user', text);
             document.getElementById('userInput').value = '';
-            document.getElementById('typingIndicator').style.display = 'block';
+            document.getElementById('typingIndicator').style.display = 'flex';
             
             try{
-                await new Promise(r => setTimeout(r,800));
+                await new Promise(r => setTimeout(r, 800));
                 const response = chatInstance.generateResponse(text);
-                addMessage('bot',response);
+                addMessage('bot', response);
             }catch(error){
                 addMessage('bot','Response error!');
             }
@@ -328,12 +346,17 @@ button:hover {
 
         (async () => {
             try{
+		    
+                loadChatHistory();
+ 
                 const ModelClass = await loadModel(currentModel);
                 chatInstance = new ModelClass();
                 await chatInstance.init();
+
                 document.querySelector('.status').textContent = 'Online';
-                document.getElementById('sendButton').addEventListener('click',handleSend);
-                document.getElementById('userInput').addEventListener('keypress',e => {
+
+                document.getElementById('sendButton').addEventListener('click', handleSend);
+                document.getElementById('userInput').addEventListener('keypress', e => {
                     if(e.key === 'Enter' && !e.shiftKey){
                         e.preventDefault();
                         handleSend();
@@ -341,6 +364,7 @@ button:hover {
                 });
             }catch(error){
                 document.querySelector('.status').textContent = 'Offline';
+                console.error('Initialization error:', error);
             }
         })();
     </script>
