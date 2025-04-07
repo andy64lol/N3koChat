@@ -274,8 +274,8 @@
       document.getElementById('chatContainer').appendChild(messageDiv);
       document.getElementById('chatContainer').scrollTop = document.getElementById('chatContainer').scrollHeight;
       
-      chatHistory.push({ sender, text });
-      localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+      chathistory_Tsundere.push({ sender, text });
+      localStorage.setItem('chathistory_Tsundere', JSON.stringify(chathistory_Tsundere));
     }
 
     function loadChatHistory() {
