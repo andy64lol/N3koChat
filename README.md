@@ -21,7 +21,7 @@ Peek behind the curtains and see how the magic works!
 
 ---
 
-> 🐾 *Made with extra love, sparkles, and a team of fluffy helpers by **andy64lol**!* 🎀
+> 🐾 *Made with extra love, sparkles, and a team of fluffy ~~helpers~~ destroyers by **andy64lol**!* 🎀
 
 
 
