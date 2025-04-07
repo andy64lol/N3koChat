@@ -6,24 +6,26 @@
   <title>N3ko Menu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
   <style>
     * {
+      margin: 0;
+      padding: 0;
       box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
     }
     body {
-      margin: 0;
-      font-family: 'Poppins', sans-serif;
       display: flex;
       height: 100vh;
       background: linear-gradient(135deg, #fff5f5 0%, #ffe0e6 100%);
       color: #333;
+      position: relative;
+      overflow: hidden;
     }
     .sidebar {
       width: 250px;
       background-color: #ffe0e6;
       color: #d1477b;
-      height: 100%;
       padding: 30px 20px;
       display: flex;
       flex-direction: column;
@@ -35,7 +37,8 @@
       font-weight: 600;
       text-align: center;
       color: #d1477b;
-      margin-bottom: 10px;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
     }
     .menu-item {
       display: block;
@@ -46,14 +49,17 @@
       text-decoration: none;
       color: #d1477b;
       font-weight: 600;
-      transition: transform 0.3s ease, background-color 0.3s ease,
-        box-shadow 0.3s ease;
+      transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
     }
     .menu-item:hover {
       background-color: #ffb6c1;
       color: #fff;
       transform: translateX(5px);
       box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    .menu-item.active {
+      background-color: #ffb6c1;
+      color: #fff;
     }
     .content {
       flex: 1;
@@ -64,16 +70,24 @@
       align-items: center;
       text-align: center;
       background-color: #fff;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
     }
     h1 {
       font-size: 36px;
       margin-bottom: 20px;
       color: #d1477b;
+      text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.3);
     }
     p {
       font-size: 20px;
       color: #555;
       margin: 0;
+    }
+    .thank-you {
+      font-size: 20px;
+      color: #d1477b;
+      margin-top: 20px;
     }
     @media (max-width: 768px) {
       body {
@@ -88,25 +102,91 @@
       .menu-item {
         flex: 1;
         margin: 0 5px;
+        padding: 10px;
       }
       .content {
         padding: 20px;
+      }
+      .logo {
+        font-size: 40px;
+      }
+    }
+    .blossom {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background-color: pink;
+      border-radius: 50%;
+      animation: fall 10s infinite linear;
+      opacity: 0;
+      pointer-events: none;
+    }
+    @keyframes fall {
+      0% {
+        top: -10px;
+        opacity: 1;
+      }
+      100% {
+        top: 100vh;
+        opacity: 0;
       }
     }
   </style>
 </head>
 <body>
-  <div class="sidebar">
+  <div class="sidebar" id="sidebar">
     <div class="logo">:3</div>
-    <a href="Nyan.html" class="menu-item">Nyan</a>
-    <a href="Tsundere.html" class="menu-item">Tsundere</a>
-    <a href="French.html" class="menu-item">French</a>
-    <a href="Italian.html" class="menu-item">Italian</a>
-    <a href="Spanish.html" class="menu-item">Spanish</a>
+    <a href="Nyan.html" class="menu-item" onclick="setActiveMenu(event)">Nyan</a>
+    <a href="Tsundere.html" class="menu-item" onclick="setActiveMenu(event)">Tsundere</a>
+    <a href="French.html" class="menu-item" onclick="setActiveMenu(event)">French</a>
+    <a href="Italian.html" class="menu-item" onclick="setActiveMenu(event)">Italian</a>
+    <a href="Spanish.html" class="menu-item" onclick="setActiveMenu(event)">Spanish</a>
   </div>
-  <div class="content">
+  <div class="content" id="content">
     <h1>Welcome to N3ko</h1>
-    <p>Choose a chatbot from the menu to start chatting!</p>
+    <p>Choose a model from the menu to start chatting!</p>
+    <p class="thank-you" id="thank-you-message"></p>
   </div>
+
+  <script>
+    function setActiveMenu(event) {
+      const menuItems = document.querySelectorAll('.menu-item');
+      menuItems.forEach(item => item.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    window.onload = () => {
+      const content = document.getElementById('content');
+      content.style.opacity = 1;
+
+      if (!localStorage.getItem('visited')) {
+        showCherryBlossoms();
+        localStorage.setItem('visited', 'true');
+        showThankYouMessage();
+      }
+    };
+
+    function showCherryBlossoms() {
+      for (let i = 0; i < 100; i++) {
+        let blossom = document.createElement('div');
+        blossom.classList.add('blossom');
+        document.body.appendChild(blossom);
+        animateBlossom(blossom);
+      }
+    }
+
+    function animateBlossom(blossom) {
+      setTimeout(() => {
+        blossom.style.animationDuration = `${Math.random() * 10 + 5}s`;
+        blossom.style.left = `${Math.random() * 100}%`;
+        blossom.style.animationTimingFunction = `linear`;
+      }, Math.random() * 1000);
+    }
+
+    function showThankYouMessage() {
+      const thankYouMessage = document.getElementById('thank-you-message');
+      thankYouMessage.textContent = 'Thank you for entering N3ko for your first time!';
+    }
+  </script>
 </body>
 </html>
