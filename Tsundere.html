@@ -247,7 +247,7 @@
     const MODEL_BASE_URL = 'https://raw.githubusercontent.com/andy64lol/N3ko/refs/heads/main/';
     const currentModel = 'Tsundere';
     let chatInstance;
-    let chatHistory = JSON.parse(localStorage.getItem('chathistory_Tsundere')) || [];
+    let chatHistory = JSON.parse(localStorage.getItem('chatHistory')) || [];
 
     async function loadModel(modelName) {
       document.getElementById('modelLoading').style.display = 'block';
@@ -274,13 +274,13 @@
       document.getElementById('chatContainer').appendChild(messageDiv);
       document.getElementById('chatContainer').scrollTop = document.getElementById('chatContainer').scrollHeight;
       
-      chathistory_Tsundere.push({ sender, text });
-      localStorage.setItem('chathistory_Tsundere', JSON.stringify(chathistory_Tsundere));
+      chatHistory.push({ sender, text });
+      localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
     }
 
     function loadChatHistory() {
       document.getElementById('chatContainer').innerHTML = '';
-      if (chathistory_Tsundere.length === 0) {
+      if (chatHistory.length === 0) {
         addMessage('bot', 'N3ko is ready!');
         return;
       }
