@@ -254,22 +254,49 @@
         document.getElementById('modelLoading').style.display = 'block';
         try {
           const modelFile = 'N3ko_' + modelName + '_model_.js';
-          return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = MODEL_BASE_URL + modelFile + '?t=' + Date.now();
-            script.onload = () => {
+          const url = MODEL_BASE_URL + modelFile + '?t=' + Date.now();
+          
+          // First try standard script tag loading
+          try {
+            return await new Promise((resolve, reject) => {
+              const script = document.createElement('script');
+              script.src = url;
+              script.onload = () => {
+                if (typeof window.NekoNyanChat === 'function') {
+                  resolve(window.NekoNyanChat);
+                } else {
+                  reject(new Error('Model class not found'));
+                }
+              };
+              script.onerror = reject;
+              document.head.appendChild(script);
+            });
+          } catch (scriptError) {
+            console.log('Script tag load failed, trying fetch:', scriptError);
+            
+            // Fallback to fetch + eval
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+            const code = await response.text();
+            
+            // Save current NekoNyanChat if it exists
+            const oldNeko = window.NekoNyanChat;
+            
+            try {
+              // Eval the code
+              eval(code);
+              
               if (typeof window.NekoNyanChat === 'function') {
-                resolve(window.NekoNyanChat);
-              } else {
-                reject(new Error('Model class not found'));
+                return window.NekoNyanChat;
               }
-            };
-            script.onerror = (err) => {
-              console.error('Script load error:', err);
-              reject(new Error('Failed to load model script'));
-            };
-            document.head.appendChild(script);
-          });
+              throw new Error('Model class not defined after eval');
+            } finally {
+              // Restore original if eval failed
+              if (!window.NekoNyanChat && oldNeko) {
+                window.NekoNyanChat = oldNeko;
+              }
+            }
+          }
         } catch (error) {
           console.error('Failed to load module:', error);
           throw error;
