@@ -257,8 +257,17 @@
           return new Promise((resolve, reject) => {
             const script = document.createElement('script');
             script.src = MODEL_BASE_URL + modelFile + '?t=' + Date.now();
-            script.onload = () => resolve(window.NekoNyanChat);
-            script.onerror = reject;
+            script.onload = () => {
+              if (typeof window.NekoNyanChat === 'function') {
+                resolve(window.NekoNyanChat);
+              } else {
+                reject(new Error('Model class not found'));
+              }
+            };
+            script.onerror = (err) => {
+              console.error('Script load error:', err);
+              reject(new Error('Failed to load model script'));
+            };
             document.head.appendChild(script);
           });
         } catch (error) {
