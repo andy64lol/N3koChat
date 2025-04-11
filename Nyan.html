@@ -257,7 +257,7 @@
         if (!response.ok) throw new Error('Model load failed');
         const scriptText = await response.text();
         const scriptBlob = new Blob([scriptText], { type: 'application/javascript' });
-        const module = await import(URL.createObjectURL(scriptBlob) + '#module');
+        const module = await import(URL.createObjectURL(scriptBlob));
         return module.default;
       } catch (error) {
         console.error('Model error:', error);
