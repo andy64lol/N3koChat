@@ -252,53 +252,43 @@
 
       async function loadModel(modelName) {
         document.getElementById('modelLoading').style.display = 'block';
+        const modelFile = 'N3ko_' + modelName + '_model_.js';
+        const url = MODEL_BASE_URL + modelFile + '?t=' + Date.now();
+        
         try {
-          const modelFile = 'N3ko_' + modelName + '_model_.js';
-          const url = MODEL_BASE_URL + modelFile + '?t=' + Date.now();
+          // Fetch the model code
+          const response = await fetch(url);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch model: HTTP ${response.status}`);
+          }
           
-          // First try standard script tag loading
+          const code = await response.text();
+          
+          // Create a blob URL with correct MIME type
+          const blob = new Blob([code], {type: 'application/javascript'});
+          const blobUrl = URL.createObjectURL(blob);
+          
           try {
-            return await new Promise((resolve, reject) => {
-              const script = document.createElement('script');
-              script.src = url;
-              script.onload = () => {
-                if (typeof window.NekoNyanChat === 'function') {
-                  resolve(window.NekoNyanChat);
-                } else {
-                  reject(new Error('Model class not found'));
-                }
-              };
-              script.onerror = reject;
-              document.head.appendChild(script);
-            });
-          } catch (scriptError) {
-            console.log('Script tag load failed, trying fetch:', scriptError);
+            // Import the module using the blob URL
+            const module = await import(blobUrl);
             
-            // Fallback to fetch + eval
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`HTTP error ${response.status}`);
-            const code = await response.text();
-            
-            // Save current NekoNyanChat if it exists
-            const oldNeko = window.NekoNyanChat;
-            
-            try {
-              // Eval the code
-              eval(code);
-              
-              if (typeof window.NekoNyanChat === 'function') {
-                return window.NekoNyanChat;
-              }
-              throw new Error('Model class not defined after eval');
-            } finally {
-              // Restore original if eval failed
-              if (!window.NekoNyanChat && oldNeko) {
-                window.NekoNyanChat = oldNeko;
-              }
+            if (!module?.default) {
+              throw new Error('Model class not found in module');
             }
+            
+            console.log('Successfully loaded model from GitHub');
+            return module.default;
+          } catch (importError) {
+            console.error('Module import failed:', importError);
+            throw new Error('Failed to import model module');
+          } finally {
+            // Clean up the blob URL
+            URL.revokeObjectURL(blobUrl);
           }
         } catch (error) {
-          console.error('Failed to load module:', error);
+          console.error('Model loading failed:', error);
+          document.querySelector('.status').textContent = 'Offline';
+          addMessage('bot', 'Failed to load chat model. Please try again later.');
           throw error;
         } finally {
           document.getElementById('modelLoading').style.display = 'none';
