@@ -244,7 +244,7 @@
   </div>
 
   <script>
-    const MODEL_BASE_URL = 'https://raw.githubusercontent.com/andy64lol/N3ko/refs/heads/main/';
+    const MODEL_BASE_URL = 'https://raw.githubusercontent.com/andy64lol/N3ko/main/';
     const currentModel = 'Tsundere';
     let chatInstance;
     let chatHistory = JSON.parse(localStorage.getItem('chatHistory')) || [];
@@ -257,7 +257,7 @@
         if (!response.ok) throw new Error('Model load failed');
         const scriptText = await response.text();
         const scriptBlob = new Blob([scriptText], { type: 'application/javascript' });
-        const module = await import(URL.createObjectURL(scriptBlob) + '#module');
+        const module = await import(URL.createObjectURL(scriptBlob));
         return module.default;
       } catch (error) {
         console.error('Model error:', error);
