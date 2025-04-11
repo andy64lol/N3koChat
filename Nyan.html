@@ -262,16 +262,34 @@
             throw new Error(`Failed to fetch model: HTTP ${response.status}`);
           }
           
-          const code = await response.text();
+          let code = await response.text();
           
-          // Create a script element and inject the code
+          // Wrap the code to handle exports properly
+          code = `
+            (function() {
+              let exports = {};
+              let module = {exports};
+              ${code}
+              return module.exports || exports || window.NekoNyanChat;
+            })();
+          `;
+          
+          // Create a script element and inject the wrapped code
           return new Promise((resolve, reject) => {
             const script = document.createElement('script');
             script.text = code;
             script.onload = () => {
-              if (typeof window.NekoNyanChat === 'function') {
+              const NekoNyanChat = (() => {
+                try {
+                  return eval(code);
+                } catch (e) {
+                  return window.NekoNyanChat;
+                }
+              })();
+              
+              if (typeof NekoNyanChat === 'function') {
                 console.log('Successfully loaded model from GitHub');
-                resolve(window.NekoNyanChat);
+                resolve(NekoNyanChat);
               } else {
                 reject(new Error('NekoNyanChat class not found'));
               }
