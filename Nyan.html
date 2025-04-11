@@ -243,39 +243,25 @@
     </div>
   </div>
 
-  <script>
-    (function() {
+  <script type="module">
+    (async function() {
       const MODEL_BASE_URL = 'https://raw.githubusercontent.com/andy64lol/N3ko/refs/heads/main/';
       const currentModel = 'Nyan';
       let chatInstance;
       let chatHistory = JSON.parse(localStorage.getItem('chatHistory')) || [];
 
-      function loadModel(modelName, callback) {
+      async function loadModel(modelName) {
         document.getElementById('modelLoading').style.display = 'block';
-        const modelFile = 'N3ko_' + modelName + '_model_.js';
-        
-        fetch(MODEL_BASE_URL + modelFile)
-          .then(function(response) {
-            if (!response.ok) throw new Error('Model load failed');
-            return response.text();
-          })
-          .then(function(scriptText) {
-            // In a real CommonJS environment, we would use require()
-            // But since we're in browser, we'll eval the module exports
-            const module = {};
-            const exports = {};
-            eval(scriptText);
-            // The module should export via module.exports or exports
-            const ModelClass = module.exports || exports;
-            callback(null, ModelClass);
-          })
-          .catch(function(error) {
-            console.error('Model error:', error);
-            callback(error);
-          })
-          .finally(function() {
-            document.getElementById('modelLoading').style.display = 'none';
-          });
+        try {
+          const modelFile = 'N3ko_' + modelName + '_model_.js';
+          const module = await import(MODEL_BASE_URL + modelFile + '?t=' + Date.now());
+          return module.default;
+        } catch (error) {
+          console.error('Failed to load module:', error);
+          throw error;
+        } finally {
+          document.getElementById('modelLoading').style.display = 'none';
+        }
       }
 
       function addMessage(sender, text) {
@@ -324,33 +310,25 @@
 
       // Initialize
       loadChatHistory();
-      loadModel(currentModel, function(error, ModelClass) {
-        if (error) {
-          document.querySelector('.status').textContent = 'Offline';
-          console.error('Initialization error:', error);
-          return;
-        }
-        
-        console.log('Loaded ModelClass:', ModelClass);
+      try {
+        const ModelClass = await loadModel(currentModel);
         chatInstance = new ModelClass();
-        if (chatInstance.init && typeof chatInstance.init === 'function') {
-          chatInstance.init().then(function() {
-            document.querySelector('.status').textContent = 'Online';
-          }).catch(function(initError) {
-            console.error('Init error:', initError);
-            document.querySelector('.status').textContent = 'Offline';
-          });
-        } else {
-          document.querySelector('.status').textContent = 'Online';
+        if (typeof chatInstance.init === 'function') {
+          await chatInstance.init();
         }
+        document.querySelector('.status').textContent = 'Online';
+      } catch (error) {
+        console.error('Initialization error:', error);
+        document.querySelector('.status').textContent = 'Offline';
+        addMessage('bot', 'Failed to initialize chat model. Please try again later.');
+      }
         
-        document.getElementById('sendButton').addEventListener('click', handleSend);
-        document.getElementById('userInput').addEventListener('keypress', function(e) {
-          if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            handleSend();
-          }
-        });
+      document.getElementById('sendButton').addEventListener('click', handleSend);
+      document.getElementById('userInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          handleSend();
+        }
       });
     })();
   </script>
